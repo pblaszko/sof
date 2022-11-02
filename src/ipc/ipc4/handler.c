@@ -1049,6 +1049,10 @@ void ipc_cmd(struct ipc_cmd_hdr *_hdr)
 		char *data = ipc->comp_data;
 		struct ipc4_message_reply reply;
 
+		/* For IPC4, only primary core should respond to host */
+		if (!cpu_is_primary(cpu_get_id()))
+			return;
+
 		/* Do not send reply for SET_DX if we are going to enter D3
 		 * The reply is going to be sent as part of the power down
 		 * sequence

@@ -83,11 +83,13 @@ static void idc_handler(struct k_p4wq_work *work)
 		break;
 	case IDC_MSG_IPC:
 		idc_cmd(&idc->received_msg);
+#if !CONFIG_IPC_MAJOR_4
 		/* Signal the host */
 		key = k_spin_lock(&ipc->lock);
 		ipc->task_mask &= ~IPC_TASK_SECONDARY_CORE;
 		ipc_complete_cmd(ipc);
 		k_spin_unlock(&ipc->lock, key);
+#endif
 	}
 }
 

@@ -119,9 +119,15 @@ int idc_wait_in_blocking_mode(uint32_t target_core, bool (*cond)(int))
  */
 static void idc_ipc(void)
 {
+	struct ipc_cmd_hdr *hdr;
 	struct ipc *ipc = ipc_get();
 
-	ipc_cmd(ipc->comp_data);
+#if CONFIG_IPC_MAJOR_4
+	hdr = ipc_compact_read_msg();
+#else
+	hdr = ipc->comp_data;
+#endif
+	ipc_cmd(hdr);
 }
 
 /**

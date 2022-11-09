@@ -74,8 +74,8 @@ int ipc_process_on_core(uint32_t core, bool blocking)
 	if (ret < 0)
 		return ret;
 
-	/* reply written by other core */
-	return 1;
+	/* for non-blocking, reply written by other core */
+	return blocking ? ret : 1;
 }
 
 /*

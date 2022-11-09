@@ -147,6 +147,8 @@ static int ipc4_create_pipeline(struct ipc *ipc, uint32_t pipeline_id, uint32_t 
 	/* sched_id is set in FW so initialize it to a invalid value */
 	pipe->sched_id = 0xFFFFFFFF;
 
+	pipe->core = 1;
+
 	/* allocate the IPC pipeline container */
 	ipc_pipe = rzalloc(SOF_MEM_ZONE_RUNTIME_SHARED, 0, SOF_MEM_CAPS_RAM,
 			   sizeof(struct ipc_comp_dev));
@@ -158,6 +160,7 @@ static int ipc4_create_pipeline(struct ipc *ipc, uint32_t pipeline_id, uint32_t 
 	ipc_pipe->pipeline = pipe;
 	ipc_pipe->type = COMP_TYPE_PIPELINE;
 	ipc_pipe->id = pipeline_id;
+	ipc_pipe->core = 1;
 
 	/* add new pipeline to the list */
 	list_item_append(&ipc_pipe->list, &ipc->comp_list);
@@ -170,6 +173,11 @@ int ipc_pipeline_new(struct ipc *ipc, ipc_pipe_new *_pipe_desc)
 	struct ipc4_pipeline_create *pipe_desc = ipc_from_pipe_new(_pipe_desc);
 
 	tr_dbg(&ipc_tr, "ipc: pipeline id = %u", (uint32_t)pipe_desc->primary.r.instance_id);
+
+	/* check core */
+	if (!cpu_is_me(1))
+		return ipc_process_on_core(1, true);
+
 
 	return ipc4_create_pipeline(ipc, pipe_desc->primary.r.instance_id,
 		pipe_desc->primary.r.ppl_priority, pipe_desc->primary.r.ppl_mem_size);

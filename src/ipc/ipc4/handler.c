@@ -576,6 +576,9 @@ static int ipc4_init_module_instance(struct ipc4_message_request *ipc4)
 	tr_dbg(&ipc_tr, "ipc4_init_module_instance %x : %x", (uint32_t)module.primary.r.module_id,
 	       (uint32_t)module.primary.r.instance_id);
 
+	if (!cpu_is_me(module.extension.r.core_id))
+		return ipc_process_on_core(module.extension.r.core_id, true);
+
 	memset(&comp, 0, sizeof(comp));
 	comp.id = IPC4_COMP_ID(module.primary.r.module_id, module.primary.r.instance_id);
 	comp.pipeline_id = module.extension.r.ppl_instance_id;
@@ -1060,10 +1063,10 @@ void ipc_cmd(struct ipc_cmd_hdr *_hdr)
 		if (ipc->task_mask & IPC_TASK_POWERDOWN)
 			return;
 
-		if (ipc_wait_for_compound_msg() != 0) {
-			tr_err(&ipc_tr, "ipc4: failed to send delayed reply");
-			err = IPC4_FAILURE;
-		}
+//		if (ipc_wait_for_compound_msg() != 0) {
+//			tr_err(&ipc_tr, "ipc4: failed to send delayed reply");
+//			err = IPC4_FAILURE;
+//		}
 
 		/* copy contents of message received */
 		reply.primary.r.rsp = SOF_IPC4_MESSAGE_DIR_MSG_REPLY;
